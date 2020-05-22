@@ -3,12 +3,18 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 using namespace std;
 
 class Parser
 {
+    private:
+        ifstream asmFile;
+        string lineHolder;
+        string nextCommand;
+        int lineCounter;
     public:
-        void initializer(ifstream);
+        void initializer(string);
         bool hasMoreCommands();
         void advance();
         string commandType();
