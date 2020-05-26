@@ -23,7 +23,7 @@ void Parser::initializer(string filenameToParse)
 bool Parser::hasMoreCommands()
 {
         getline(asmFile, lineHolder);
-        if (  asmFile.eof())
+        if (  !asmFile) //asmFile.eof() was previously here
         {
             asmFile.close();
             return false;

@@ -1,9 +1,12 @@
 //Main application doing the comversion
 #include "parser.h"
 #include "code.h"
+#include <bitset>
 using namespace std;
 
 string getFileName(string inputFile); //Prototype
+
+string convertTo16BitBinary(string inputSymbol); //Prototype
 
 
 
@@ -19,6 +22,7 @@ int main(int argc, char *argv[])
     Code codeObject;
     string symbol, dest, comp, jump;
 
+
     parserObject.initializer( argv[1]);
     ofstream hackFile( getFileName(argv[1]) + ".hack");
     while(parserObject.hasMoreCommands())
@@ -28,7 +32,8 @@ int main(int argc, char *argv[])
         if( symbol != "VOID")
         {
             cout << "Symbol added to file:  " << symbol << endl;
-            hackFile << symbol << endl;
+            string binarySymbol = convertTo16BitBinary(symbol);
+            hackFile << binarySymbol << endl;
         }
         else if( symbol == "VOID")
         {
@@ -39,7 +44,7 @@ int main(int argc, char *argv[])
 
             cout << "Processed C_command:   " << dest + comp + jump << endl;
 
-            hackFile << "111" + dest + comp + jump << endl;
+            hackFile << "111" + comp + dest + jump << endl;
         }
     }
      
@@ -70,4 +75,15 @@ string getFileName(string inputFile)
 
     string newFileName = inputFile.erase(fileNameLastIndex);
     return newFileName;
+}
+
+//routine for converting symbol to binary
+string convertTo16BitBinary(string inputSymbol)
+{
+    long decimalNumber = stoi(inputSymbol);
+    bitset<16> b(decimalNumber);
+    cout << "String " << inputSymbol << " is " << decimalNumber 
+         << " in decimal and " << b << " as a 16-bit binary." << endl;
+
+    return b.to_string();
 }
