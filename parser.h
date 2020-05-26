@@ -9,11 +9,11 @@ using namespace std;
 class Parser
 {
     private:
-        ifstream asmFile;
-        string lineHolder;
         string nextCommand;
         int lineCounter;
     public:
+        ifstream asmFile;
+        string lineHolder;
         void initializer(string);
         bool hasMoreCommands();
         void advance();
