@@ -28,23 +28,26 @@ int main(int argc, char *argv[])
     while(parserObject.hasMoreCommands())
     {
         parserObject.advance();
-        symbol = parserObject.symbol();
-        if( symbol != "VOID")
+        if(parserObject.commandType() != "IGNORE")
         {
-            cout << "Symbol added to file:  " << symbol << endl;
-            string binarySymbol = convertTo16BitBinary(symbol);
-            hackFile << binarySymbol << endl;
-        }
-        else if( symbol == "VOID")
-        {
-            cout << "C_Command to be processed: " << symbol << endl;
-            dest =  codeObject.dest(parserObject.dest());
-            comp =  codeObject.comp(parserObject.comp());
-            jump = codeObject.jump(parserObject.jump());
+            symbol = parserObject.symbol();
+            if( symbol != "VOID")
+            {
+                cout << "Symbol added to file:  " << symbol << endl;
+                string binarySymbol = convertTo16BitBinary(symbol);
+                hackFile << binarySymbol << endl;
+            }
+            else if( symbol == "VOID")
+            {
+                cout << "C_Command to be processed: " << symbol << endl;
+                dest =  codeObject.dest(parserObject.dest());
+                comp =  codeObject.comp(parserObject.comp());
+                jump = codeObject.jump(parserObject.jump());
 
-            cout << "Processed C_command:   " << dest + comp + jump << endl;
+                cout << "Processed C_command:   " << dest + comp + jump << endl;
 
-            hackFile << "111" + comp + dest + jump << endl;
+                hackFile << "111" + comp + dest + jump << endl;
+            }
         }
     }
      
@@ -56,6 +59,7 @@ int main(int argc, char *argv[])
 
 
     cout << "Conversion of assembly language to machine code completed." << endl;
+    cout << parserObject.getLineCount() << " lines of actual code processed." << endl;
     hackFile.close();
     return 0;
 }
