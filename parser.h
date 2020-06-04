@@ -12,6 +12,10 @@ class Parser
         string nextCommand;
         int lineCounter;
     public:
+        int getLineCount()
+        {
+            return lineCounter;
+        }
         ifstream asmFile;
         string lineHolder;
         void initializer(string);

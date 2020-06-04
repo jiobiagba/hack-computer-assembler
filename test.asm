@@ -1,12 +1,19 @@
+//Testing comments and whitespace
 @100
 D=A
-@150
+
+
+@150 //Just another number
 D=D+A
 @80
 A=M
 @55
 M=M-D
-@45
+
+//Intentional Comment Line 1
+//Intenional Comment Line 2 with space
+
+@45 //Intentional Comment 3;
 M=1
 @105
 M=0

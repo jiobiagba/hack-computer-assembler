@@ -28,14 +28,34 @@ bool Parser::hasMoreCommands()
             asmFile.close();
             return false;
         }
+
+
+        //Handling comments and whitespace
+        string holderA = lineHolder;
+        const int indexOfStartOfComment = lineHolder.find("//");
+
+        if(indexOfStartOfComment != -1)
+        {
+            holderA = holderA.erase(indexOfStartOfComment);
+        }
+
+        if(lineHolder.length() == 0 || holderA.length() == 0)
+        {
+            lineHolder = "IGNORE";
+        } else
+        {
+            lineHolder = holderA;
+            lineCounter = lineCounter + 1;
+        }
+
         return true;
-        //Later I'll add logic to check for comment and whitespace
 }
 
 
 //Routine to read next command and make it current command
 void Parser::advance()
 {
+    cout << "Next instruction to process is:        " << lineHolder << endl;
     nextCommand = lineHolder;   
 }
 
@@ -47,7 +67,7 @@ string Parser::commandType()
     if(nextCommand.find('=') != -1 || nextCommand.find(';') != -1) return "C_COMMAND";
     if(nextCommand[0] == '(' && nextCommand[nextCommand.length() - 1] == ')') return "L_COMMAND";
 
-    return "Error in determining command type of line:   " + nextCommand;
+    return nextCommand;
 }
 
 
