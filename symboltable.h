@@ -1,46 +1,34 @@
 #ifndef _SYMBOLTABLE_
 #define _SYMBOLTABLE_
 
+#define MAX 24576
+
 #include <iostream>
 #include <string>
 using namespace std;
 
-class SymbolTable
+class Entry
 {
-    private:
         string symbol;
         int address;
+        Entry* nextEntry;
     public:
-        SymbolTable(string symbol, int address)
-        {
-            this->symbol = symbol;
-            this->address = address;
-        }
-
-        string getSymbol()
-        {
-            return symbol;
-        }
-
-        int getAddress()
-        {
-            return address;
-        }
-
+        Entry();
+        Entry(string symbol, int address);
+        friend class SymbolTable; //This means Symbol Table class can access all private members of Entry class
 };
 
 
-class SymbolTableMap
+class SymbolTable
 {
-    private:
-        SymbolTable **table;
+        Entry* entryHead[MAX];
     public:
-        SymbolTableMap();
-        void addEntry(string, int);
+        SymbolTable();
+        void addEntry(string symbol, int address);
+        bool contains(string symbol);
+        int getAddress(string symbol);
         void display();
-        bool contains(string);
-        int getAddress(string);
-        ~SymbolTableMap();
+        ~SymbolTable();
 };
 
 #endif //_SYMBOLTABLE_

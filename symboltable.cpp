@@ -3,86 +3,117 @@
 
 using namespace std;
 
-const int TABLE_SIZE = 24576;
+int hashFunction(string& input); //Prorotype
 
-
-int hashFunction(string symbol)
+//Defining methods of the Entry class
+Entry::Entry()
 {
-    int total = 0;
-    for (int i = 0; i < symbol.length(); i++)
+    nextEntry = NULL;
+};
+
+Entry::Entry(string symbol, int address)
+{
+    this->symbol = symbol;
+    this->address = address;
+    nextEntry = NULL;
+}
+
+Entry::print()
+{
+    cout << "Symbol:    " << symbol
+         << "       Address:    " << address << endl;
+}
+
+//Defining functions of the SymbolTable class
+SymbolTable::SymbolTable()
+{
+    for (int i = 0; i < MAX; i++)
+        entryHead[i] = NULL;
+}
+
+SymbolTable::addEntry(string symbol, int address)
+{
+    int hashResult = hashFunction(symbol);
+    Entry* newSymbolTablePointer = new Entry(symbol, address);
+
+    if (entryHead[hashResult] == NULL)
     {
-        total = total + int(symbol[i]);
+        entryHead[hashResult] = newSymbolTableEntry;
+        cout << "Symbol " << symbol << " and Address " << address << " successfully added (no collision)" << endl;
     }
-    cout << "Symbol:        " << symbol << "    Hash:       " << total % 13 << endl;
-    return total % 13; //Or prime numbers like 17, 29, 41, 43, 101, 103
-}
-
-//Create a new Symbol Table of size 24576
-SymbolTableMap::SymbolTableMap()
-{
-    table = new SymbolTable* [TABLE_SIZE];
-    for (int i = 0; i < TABLE_SIZE; i++) table[i] = NULL;
-}
-
-//Adds a new entry to the Symbol Table
-void SymbolTableMap::addEntry(string symbol, int address)
-{
-    SymbolTable *tableEntry = (struct SymbolTable*) malloc(sizeof(SymbolTable));
-    tableEntry = new SymbolTable(symbol, address);
-
-    int hash = hashFunction(symbol);
-    while (table[hash] != NULL)
+    else
     {
-        ++hash; //Using linear probing to avoid collision
+        Entry* insertPointer = entryHead[hashResult]
+        while (insertPointer->nextEntry != NULL)
+            insertPointer = insertPointer->nextEntry;
+
+        insertPointer->nextEntry = newSymbolTableEntry;
+        cout << "Symbol " << symbol << " and Address " << address << " successfully added (after collision)" << endl;
     }
-
-    table[hash] = tableEntry;
+    
 }
 
-//Checks if the Symbol Table already contains the symbol supplied as parameter
-bool SymbolTableMap::contains(string symbol)
+SymbolTable::contains(string symbol)
 {
-    int hash = hashFunction(symbol);
-    while (table[hash] != NULL)
+    int hashResult = hashFunction(symbol);
+    Entry *ptr = entryHead[hashResult];
+
+    if (ptr == NULL)
+        return false;
+
+    while (ptr != NULL)
     {
-        if (table[hash]->getSymbol() == symbol) return true;
-        ++hash;
+        if (ptr->symbol == symbol)
+        {
+            return true;
+        }
+
+        ptr = ptr->nextEntry;
     }
 
     return false;
 }
 
-//Gets the corresponding address of the symbol supplied as parameter
-int SymbolTableMap::getAddress(string symbol)
+SymbolTable::getAddress(string symbol)
 {
-    int hash = hashFunction(symbol);
-    while (table[hash] != NULL)
+    int hashResult = hashFunction(symbol);
+    Entry *ptr = entryHead[hashResult];
+
+    if (ptr == NULL)
     {
-        if (table[hash]->getSymbol() == symbol) return table[hash]->getAddress();
-        ++hash;
+        cout << "This location in the symbol table has no value." << endl;
+        exit(1);
     }
-}
 
-void SymbolTableMap::display()
-{
-    cout << "--------------------" << "Symbol Table Contents" << "--------------------" << "\n"
-            << "        Symbol          " << "------------------" << "     Address    " << endl;
-
-    for (int i = 0; i < TABLE_SIZE; i++)
+    while (ptr != NULL)
     {
-        if(table[i] != NULL)
+        if (ptr->symbol == symbol)
         {
-            cout <<"        " << table[i]->getSymbol() << "                                  " << table[i]->getAddress() << endl;
+            cout << "Address of symbol " << symbol << " found!" << endl;
+            return ptr->address;
         }
+
+        ptr = ptr->nextEntry;
     }
+
+    cout << "Nothing found here!" << endl;
+    exit(2);
 }
 
-//SymbolTableMap Deconstructor
-SymbolTableMap::~SymbolTableMap()
+
+
+
+//Hash Function
+int hashFunction(string& input)
 {
-    for (int i = 0; i < TABLE_SIZE; i++)
+    int total = 0;
+    for (int i = 0; i < input.length(); i++)
     {
-        if (table[i] != NULL) delete table[i];
+        total = total + input[i]; //This will be adding the ASCII code to total
     }
-    delete[] table;
+
+    cout << "Input:     " << input 
+         << "\nHash:    " << (total % 100) << endl;
+
+    return (total % 100);
 }
