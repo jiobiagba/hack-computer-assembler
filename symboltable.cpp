@@ -6,11 +6,13 @@ using namespace std;
 int hashFunction(string& input); //Prorotype
 
 //Defining methods of the Entry class
+//Basic entry 
 Entry::Entry()
 {
     nextEntry = NULL;
 };
 
+//Entry with supplied symbol and address
 Entry::Entry(string symbol, int address)
 {
     this->symbol = symbol;
@@ -18,42 +20,59 @@ Entry::Entry(string symbol, int address)
     nextEntry = NULL;
 }
 
-Entry::print()
+//Print One Symbol Table Entry
+void Entry::print()
 {
     cout << "Symbol:    " << symbol
          << "       Address:    " << address << endl;
 }
 
 //Defining functions of the SymbolTable class
+
+//Initialize a Symbol Table
 SymbolTable::SymbolTable()
 {
     for (int i = 0; i < MAX; i++)
         entryHead[i] = NULL;
 }
 
-SymbolTable::addEntry(string symbol, int address)
+//Display all entries of the Symbol Table
+void SymbolTable::display()
+{
+    for (int i = 0; i < MAX; i++)
+    {
+        if (entryHead[i] != NULL)
+        {
+            entryHead[i]->print();
+        }
+    }
+}
+
+//Add New Entry to Symbol Table
+void SymbolTable::addEntry(string symbol, int address)
 {
     int hashResult = hashFunction(symbol);
     Entry* newSymbolTablePointer = new Entry(symbol, address);
 
     if (entryHead[hashResult] == NULL)
     {
-        entryHead[hashResult] = newSymbolTableEntry;
+        entryHead[hashResult] = newSymbolTablePointer;
         cout << "Symbol " << symbol << " and Address " << address << " successfully added (no collision)" << endl;
     }
     else
     {
-        Entry* insertPointer = entryHead[hashResult]
+        Entry* insertPointer = entryHead[hashResult];
         while (insertPointer->nextEntry != NULL)
             insertPointer = insertPointer->nextEntry;
 
-        insertPointer->nextEntry = newSymbolTableEntry;
+        insertPointer->nextEntry = newSymbolTablePointer;
         cout << "Symbol " << symbol << " and Address " << address << " successfully added (after collision)" << endl;
     }
     
 }
 
-SymbolTable::contains(string symbol)
+//Check if symbol exists in Symbol Table
+bool SymbolTable::contains(string symbol)
 {
     int hashResult = hashFunction(symbol);
     Entry *ptr = entryHead[hashResult];
@@ -74,7 +93,8 @@ SymbolTable::contains(string symbol)
     return false;
 }
 
-SymbolTable::getAddress(string symbol)
+//Get address of symbol in Symbol Table
+int SymbolTable::getAddress(string symbol)
 {
     int hashResult = hashFunction(symbol);
     Entry *ptr = entryHead[hashResult];
@@ -100,7 +120,15 @@ SymbolTable::getAddress(string symbol)
     exit(2);
 }
 
-
+//Free Symbol Table Memory
+SymbolTable::~SymbolTable()
+{
+    for (int i = 0; i < MAX; i++)
+    {
+        if (entryHead[i] != NULL)
+            delete entryHead[i];
+    }
+}
 
 
 //Hash Function

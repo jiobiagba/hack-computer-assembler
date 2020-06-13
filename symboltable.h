@@ -15,6 +15,7 @@ class Entry
     public:
         Entry();
         Entry(string symbol, int address);
+        void print();
         friend class SymbolTable; //This means Symbol Table class can access all private members of Entry class
 };
 
