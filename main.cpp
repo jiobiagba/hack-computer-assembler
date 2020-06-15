@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     parserObject.initializer( argv[1]);
     ofstream hackFile( getFileName(argv[1]) + ".hack");
     initializeSymbolTable("predefinedsymbols.txt");
+    firstPass(parserObject);
      
     if( !parserObject.asmFile.eof())
     {
@@ -37,12 +38,11 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    secondPass();
-
     cout << "Conversion of assembly language to machine code completed." << endl;
     cout << parserObject.getLineCount() << " lines of actual code processed." << endl;
     hackFile.close();
-    newSymbolTable.~SymbolTable();
+    newSymbolTable.display();
+    newSymbolTable.getAddress("MAX");
     return 0;
 }
 
@@ -107,7 +107,7 @@ void initializeSymbolTable(string symbolsFile)
     }
 
     addressOfNextVariable = newSymbolTable.getAddress("R15") + 1;
-    newSymbolTable.display();
+    // newSymbolTable.display();
     inputFile.close();
 }
 
@@ -115,6 +115,19 @@ void initializeSymbolTable(string symbolsFile)
 //Routine to populate symbol table with symbols
 void firstPass(Parser& newParserObject)
 {
+    while (newParserObject.hasMoreCommands())
+    {
+        newParserObject.advance();
+        string commandTypeMine = newParserObject.commandType();
+        string symbolMine = newParserObject.symbol();
+        if(commandTypeMine == "A_COMMAND" && symbolMine != "VOID" )
+        {        
+            string& symbolRef = symbolMine;
+            cout << "A Command for Insertion:       " << symbolRef << "    with length     "<< symbolMine.length() << " \n" << endl;
+            newSymbolTable.addEntry(symbolRef, addressOfNextVariable);
+            addressOfNextVariable++;
+        }
+    }
     
 }
 

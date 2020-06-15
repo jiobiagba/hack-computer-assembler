@@ -76,8 +76,8 @@ string Parser::symbol()
 {
     if(Parser::commandType() == "A_COMMAND")
     {
-        string aCommand = nextCommand.erase(0,1);
-        cout << "acommand:  " << aCommand << endl;
+        string aCommand = (nextCommand.erase(0,1)).erase(nextCommand.length() -1, 1);
+        cout << "acommand:  " << aCommand << "  of length   " << aCommand.length() << endl;
         return aCommand;
     }
     else if(Parser::commandType() == "L_COMMAND")

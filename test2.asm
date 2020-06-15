@@ -2,3 +2,13 @@
 M=D
 @variable
 M=M+D
+@i
+M=1
+@sum
+M=1
+@MAX
+M=M+D
+@first12
+M=A
+@u_var
+M=A+D
