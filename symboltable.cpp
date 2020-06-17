@@ -3,86 +3,158 @@
 
 using namespace std;
 
-const int TABLE_SIZE = 24576;
+int hashFunction(string& input); //Prorotype
 
+//Defining methods of the Entry class
+//Basic entry 
+// Entry::Entry()
+// {
+//     nextEntry = NULL;
+// };
 
-int hashFunction(string symbol)
+//Entry with supplied key and address
+Entry::Entry(string key, int address)
 {
-    int total = 0;
-    for (int i = 0; i < symbol.length(); i++)
+    this->key = key;
+    this->address = address;
+}
+
+//Print One key Table Entry
+void Entry::print()
+{
+    cout << "key:    " << key
+         << "       Address:    " << address << endl;
+}
+
+//Defining functions of the keyTable class
+
+//Initialize a key Table
+SymbolTable::SymbolTable()
+{
+    for (int i = 0; i < MAX; i++)
+        entryHead[i] = NULL;
+}
+
+//Display all entries of the key Table
+void SymbolTable::display()
+{
+    for (int i = 0; i < MAX; i++)
     {
-        total = total + int(symbol[i]);
+        if (entryHead[i] != NULL)
+        {
+            entryHead[i]->print();
+        }
     }
-    cout << "Symbol:        " << symbol << "    Hash:       " << total % 13 << endl;
-    return total % 13; //Or prime numbers like 17, 29, 41, 43, 101, 103
 }
 
-//Create a new Symbol Table of size 24576
-SymbolTableMap::SymbolTableMap()
+//Add New Entry to key Table
+void SymbolTable::addEntry(string& key, int address)
 {
-    table = new SymbolTable* [TABLE_SIZE];
-    for (int i = 0; i < TABLE_SIZE; i++) table[i] = NULL;
-}
+    int hashResult = hashFunction(key);
+    Entry* newkeyTablePointer = new Entry(key, address);
+    int exitCode = 1;
 
-//Adds a new entry to the Symbol Table
-void SymbolTableMap::addEntry(string symbol, int address)
-{
-    SymbolTable *tableEntry = (struct SymbolTable*) malloc(sizeof(SymbolTable));
-    tableEntry = new SymbolTable(symbol, address);
-
-    int hash = hashFunction(symbol);
-    while (table[hash] != NULL)
+    while (exitCode > 0)
     {
-        ++hash; //Using linear probing to avoid collision
-    }
-
-    table[hash] = tableEntry;
+        if (entryHead[hashResult] == NULL)
+        {
+            entryHead[hashResult] = newkeyTablePointer;
+            cout << "key " << key << " and Address " << address << " successfully added after " << exitCode << " checks" << endl;
+            exitCode = 0;
+        }
+        else
+        {
+            {
+                hashResult++;
+            }
+        }
+        
+    }    
 }
 
-//Checks if the Symbol Table already contains the symbol supplied as parameter
-bool SymbolTableMap::contains(string symbol)
+//Check if key exists in key Table
+bool SymbolTable::contains(string key)
 {
-    int hash = hashFunction(symbol);
-    while (table[hash] != NULL)
+    int hashResult = hashFunction(key);
+
+    if (entryHead[hashResult] == NULL)
+        return false;
+
+    while (entryHead[hashResult] != NULL)
     {
-        if (table[hash]->getSymbol() == symbol) return true;
-        ++hash;
+        if (entryHead[hashResult]->key == key)
+        {
+            return true;
+        }
+
+        hashResult++;
     }
 
     return false;
 }
 
-//Gets the corresponding address of the symbol supplied as parameter
-int SymbolTableMap::getAddress(string symbol)
+//Get address of key in key Table
+int SymbolTable::getAddress(string key)
 {
-    int hash = hashFunction(symbol);
-    while (table[hash] != NULL)
+    int hashResult = hashFunction(key);
+
+    while (entryHead[hashResult] != NULL)
     {
-        if (table[hash]->getSymbol() == symbol) return table[hash]->getAddress();
-        ++hash;
+        if (entryHead[hashResult]->key == key)
+        {
+            cout << "Address of key " << key << " found!" << endl;
+            return entryHead[hashResult]->address;
+        }
+
+        hashResult++;
     }
+
+    cout << "Nothing found here!" << endl;
+    exit(2);
 }
 
-void SymbolTableMap::display()
-{
-    cout << "--------------------" << "Symbol Table Contents" << "--------------------" << "\n"
-            << "        Symbol          " << "------------------" << "     Address    " << endl;
 
-    for (int i = 0; i < TABLE_SIZE; i++)
+//Change the address of existing key in Symbol Table
+bool SymbolTable::setAddress(string key, int newAddress)
+{
+    int hashResult = hashFunction(key);
+
+    while (entryHead[hashResult] != NULL)
     {
-        if(table[i] != NULL)
+        if (entryHead[hashResult]->key == key)
         {
-            cout <<"        " << table[i]->getSymbol() << "                                  " << table[i]->getAddress() << endl;
+            cout << "Old Address:   " << entryHead[hashResult]->address << endl;
+            entryHead[hashResult]->setAddr(newAddress);
+            cout << "New Address:   " << entryHead[hashResult]->address << endl;
+            return true;
         }
     }
+
+    cout << "This key does not exist in Symbol Table!" << endl;
+    return false;
 }
 
-//SymbolTableMap Deconstructor
-SymbolTableMap::~SymbolTableMap()
+//Free key Table Memory
+SymbolTable::~SymbolTable()
 {
-    for (int i = 0; i < TABLE_SIZE; i++)
+    for (int i = 0; i < MAX; i++)
     {
-        if (table[i] != NULL) delete table[i];
+            delete entryHead[i];
     }
-    delete[] table;
+}
+
+
+//Hash Function
+int hashFunction(string& input)
+{
+    int total = 0;
+    for (int i = 0; i < input.length(); i++)
+    {
+        total = total + input[i]; //This will be adding the ASCII code to total
+    }
+
+    cout << "Input:     " << input 
+         << "\nHash:    " << (total % 100) << endl;
+
+    return (total % 100);
 }
