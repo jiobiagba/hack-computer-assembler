@@ -1,7 +1,10 @@
 //Defining parser module methods
 #include <iostream>
+#include <bits/stdc++.h>
 #include "parser.h"
 using namespace std;
+
+string removeAllWhiteSpaces(string variableToClean); //Prototype
 
 //Routine to open file and get ready to parse it.
 void Parser::initializer(string filenameToParse)
@@ -56,7 +59,9 @@ bool Parser::hasMoreCommands()
 void Parser::advance()
 {
     cout << "Next instruction to process is:        " << lineHolder << endl;
-    nextCommand = lineHolder;   
+    cout << "Length before whitespace removal:  " << lineHolder.length() << endl;
+    nextCommand = removeAllWhiteSpaces(lineHolder);
+    cout << "Length after whitespace removal:   " << nextCommand.length() << endl;
 }
 
 
@@ -76,7 +81,7 @@ string Parser::symbol()
 {
     if(Parser::commandType() == "A_COMMAND")
     {
-        string aCommand = (nextCommand.erase(0,1)).erase(nextCommand.length() -1, 1);
+        string aCommand = (nextCommand.erase(0,1));
         cout << "acommand:  " << aCommand << "  of length   " << aCommand.length() << endl;
         return aCommand;
     }
@@ -151,4 +156,11 @@ string Parser::jump()
 
         return "null";
     }
+}
+
+//Function to remove all leading, trailing and in-between white spaces from string
+string removeAllWhiteSpaces(string variableToClean)
+{
+    variableToClean.erase(std::remove_if(variableToClean.begin(), variableToClean.end(), ::isspace), variableToClean.end());
+    return variableToClean;
 }

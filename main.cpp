@@ -8,6 +8,7 @@ using namespace std;
 string getFileName(string inputFile); //Prototype
 string convertTo16BitBinary(string inputSymbol); //Prototype
 void initializeSymbolTable(string symbolsFile); //Protoype
+bool numberVerifierFunction(string& variableToVerify); //Prototype
 void firstPass(Parser& newParserObject); //Prototype
 void secondPass(); //Prototype
 
@@ -121,15 +122,61 @@ void firstPass(Parser& newParserObject)
         string commandTypeMine = newParserObject.commandType();
         string symbolMine = newParserObject.symbol();
         if(commandTypeMine == "A_COMMAND" && symbolMine != "VOID" )
-        {        
+        {   
+            //Only Add an A_COMMAND if the A_COMMAND does not exist in Symbol Table   
+            if(!newSymbolTable.contains(symbolMine))
+            {
+                string& symbolRef = symbolMine;
+                bool isNumber = numberVerifierFunction(symbolMine);
+                if(!isNumber)
+                {
+                    cout << "A Command for Insertion:       " << symbolRef << "    with length     "<< symbolMine.length() << " \n" << endl;
+                    newSymbolTable.addEntry(symbolRef, addressOfNextVariable);
+                    addressOfNextVariable++;
+                }
+            }
+        }
+        else if(commandTypeMine == "L_COMMAND" && symbolMine != "VOID")
+        {
             string& symbolRef = symbolMine;
-            cout << "A Command for Insertion:       " << symbolRef << "    with length     "<< symbolMine.length() << " \n" << endl;
-            newSymbolTable.addEntry(symbolRef, addressOfNextVariable);
-            addressOfNextVariable++;
+            int lineAddress = newParserObject.getLineCount() + 1;
+            /*
+            If the L_Command hasn't been preadded as an A_COMMAND, then add L_COMMAND to symbol table
+            else change the address of the existing L_COMMAND previously added as an A_COMMAND to the right line count
+            */
+            if(!newSymbolTable.contains(symbolMine))
+            {
+                cout << "L COMMAND for insertion:   " << symbolRef << " with address     " << lineAddress << endl;
+                newSymbolTable.addEntry(symbolRef, lineAddress);
+            }
+            else if(newSymbolTable.contains(symbolMine))
+            {
+                cout << symbolMine << " already exists in Symbol table!" << endl;
+                newSymbolTable.setAddress(symbolMine, lineAddress);
+            }
         }
     }
     
 }
+
+
+//Function to verify if a string is made up of only digits
+bool numberVerifierFunction(string& variableToVerify)
+{
+    for (int n = 0; n < variableToVerify.length(); n++)
+    {
+        cout << "Checking for only numbers ......" << variableToVerify[n] << endl;
+        if (!isdigit(variableToVerify[n]))
+        {
+            cout << "Test for only numbers failed,  returned:        " << false << endl;
+            return false;
+        }
+    }
+
+    cout << "Test for only numbers returned:        " << true << endl;
+    return true;
+}
+
 
 //Second pass
 void secondPass()

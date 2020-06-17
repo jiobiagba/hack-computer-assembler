@@ -51,7 +51,6 @@ void SymbolTable::display()
 void SymbolTable::addEntry(string& key, int address)
 {
     int hashResult = hashFunction(key);
-    cout << "Key at top of ADD ENTRY:   " << key << endl;
     Entry* newkeyTablePointer = new Entry(key, address);
     int exitCode = 1;
 
@@ -70,26 +69,7 @@ void SymbolTable::addEntry(string& key, int address)
             }
         }
         
-    }
-
-    // if (entryHead[hashResult] == NULL)
-    // {
-    //     entryHead[hashResult] = newkeyTablePointer;
-    //     cout << "key " << key << " and Address " << address << " successfully added (no collision)" << endl;
-    // }
-    // else
-    // {
-    //     while (entryHead[hashResult] != NULL)
-    //     {
-    //         hashResult++;
-    //         if (entryHead[hashResult] == NULL)
-    //         {
-    //             entryHead[hashResult] = newkeyTablePointer;
-    //             cout << "key " << key << " and Address " << address << " successfully added (after collision)" << endl;
-    //         }
-    //     }
-    // }
-    
+    }    
 }
 
 //Check if key exists in key Table
@@ -117,13 +97,6 @@ bool SymbolTable::contains(string key)
 int SymbolTable::getAddress(string key)
 {
     int hashResult = hashFunction(key);
-    
-
-    if (entryHead[hashResult] == NULL)
-    {
-        cout << "This location in the key table has no value." << endl;
-        exit(1);
-    }
 
     while (entryHead[hashResult] != NULL)
     {
@@ -138,6 +111,27 @@ int SymbolTable::getAddress(string key)
 
     cout << "Nothing found here!" << endl;
     exit(2);
+}
+
+
+//Change the address of existing key in Symbol Table
+bool SymbolTable::setAddress(string key, int newAddress)
+{
+    int hashResult = hashFunction(key);
+
+    while (entryHead[hashResult] != NULL)
+    {
+        if (entryHead[hashResult]->key == key)
+        {
+            cout << "Old Address:   " << entryHead[hashResult]->address << endl;
+            entryHead[hashResult]->setAddr(newAddress);
+            cout << "New Address:   " << entryHead[hashResult]->address << endl;
+            return true;
+        }
+    }
+
+    cout << "This key does not exist in Symbol Table!" << endl;
+    return false;
 }
 
 //Free key Table Memory
