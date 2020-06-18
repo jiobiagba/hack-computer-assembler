@@ -1,4 +1,4 @@
-//Main application doing the comversion
+//Main application doing the conversion
 #include "parser.h"
 #include "code.h"
 #include "symboltable.h"
@@ -19,8 +19,6 @@ Parser ParserTwo;
 Code codeObject;
 
 int addressOfNextVariable;
-string symbol, dest, comp, jump;
-
 
 int main(int argc, char *argv[])
 {
