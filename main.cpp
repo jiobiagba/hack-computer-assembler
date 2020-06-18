@@ -10,7 +10,8 @@ string getFileName(string inputFile); //Prototype
 string convertTo16BitBinary(int inputAddress); //Prototype
 void initializeSymbolTable(string symbolsFile); //Protoype
 bool numberVerifierFunction(string& variableToVerify); //Prototype
-void firstPass(Parser& ParserTwo); //Prototype
+void firstPassForA(Parser& ParserTwo); //Prototype
+void firstPassForL(Parser& ParserTwo); //Prototype
 
 SymbolTable newSymbolTable;
 Parser parserObject;
@@ -31,8 +32,19 @@ int main(int argc, char *argv[])
 
     parserObject.initializer( argv[1]); //Open asm file for first pass
     initializeSymbolTable("predefinedsymbols.txt"); //Initialize Symbol Table
-    firstPass(parserObject); //First pass to build symbol table
+    firstPassForL(parserObject); //First pass to build symbol table with only L Commands
     
+    //Close input asm file
+    if( !parserObject.asmFile.eof())
+    {
+        cerr << "Error in reading file " << argv[1] << endl;
+        return 2;
+    }
+    parserObject.asmFile.close();
+
+    parserObject.initializer( argv[1]); //Open asm file for first pass
+    firstPassForA(parserObject); //First pass to build symbol table with A Commands
+
     //Close input asm file
     if( !parserObject.asmFile.eof())
     {
@@ -157,8 +169,36 @@ void initializeSymbolTable(string symbolsFile)
 }
 
 
+void firstPassForL(Parser& ParserTwo)
+{
+    while (ParserTwo.hasMoreCommands())
+    {
+        ParserTwo.advance();
+        string commandTypeMine = ParserTwo.commandType();
+        string symbolMine = ParserTwo.symbol();
+        if(commandTypeMine == "L_COMMAND" && symbolMine != "VOID")
+        {
+            string& symbolRef = symbolMine;
+            int lineAddress = ParserTwo.getLineCount();
+            /*
+            If the L_Command hasn't been preadded as an A_COMMAND, then add L_COMMAND to symbol table
+            else change the address of the existing L_COMMAND previously added as an A_COMMAND to the right line count
+            */
+            if(!newSymbolTable.contains(symbolMine))
+            {
+                cout << "L COMMAND for insertion:   " << symbolRef << " with address     " << lineAddress << endl;
+                newSymbolTable.addEntry(symbolRef, lineAddress);
+            }
+            else if(newSymbolTable.contains(symbolMine))
+            {
+                cout << symbolMine << " already exists in Symbol table!" << endl;
+            }
+        }
+    }
+}
+
 //Routine to populate symbol table with symbols
-void firstPass(Parser& ParserTwo)
+void firstPassForA(Parser& ParserTwo)
 {
     while (ParserTwo.hasMoreCommands())
     {
@@ -180,27 +220,7 @@ void firstPass(Parser& ParserTwo)
                 }
             }
         }
-        else if(commandTypeMine == "L_COMMAND" && symbolMine != "VOID")
-        {
-            string& symbolRef = symbolMine;
-            int lineAddress = ParserTwo.getLineCount();
-            /*
-            If the L_Command hasn't been preadded as an A_COMMAND, then add L_COMMAND to symbol table
-            else change the address of the existing L_COMMAND previously added as an A_COMMAND to the right line count
-            */
-            if(!newSymbolTable.contains(symbolMine))
-            {
-                cout << "L COMMAND for insertion:   " << symbolRef << " with address     " << lineAddress << endl;
-                newSymbolTable.addEntry(symbolRef, lineAddress);
-            }
-            else if(newSymbolTable.contains(symbolMine))
-            {
-                cout << symbolMine << " already exists in Symbol table!" << endl;
-                newSymbolTable.setAddress(symbolMine, lineAddress);
-            }
-        }
-    }
-    
+    }   
 }
 
 
