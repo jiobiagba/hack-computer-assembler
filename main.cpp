@@ -77,10 +77,48 @@ int main(int argc, char *argv[])
                 }
                 else if( !numberVerifierFunction(symbolMine)) //If it's not a number, get address from symbol table, convert to binary and write to file
                 {
-                    addressMine = newSymbolTable.getAddress(symbolMine);
-                    cout << "Symbol added to file:  " << addressMine << endl;
-                    string binarySymbol = convertTo16BitBinary(addressMine);
-                    hackFile << binarySymbol << endl;
+                    if( symbolMine == "R0")
+                    {
+                        addressMine = newSymbolTable.getAddress("SP");
+                        cout << "Symbol added to file:  " << addressMine << endl;
+                        string binarySymbol = convertTo16BitBinary(addressMine);
+                        hackFile << binarySymbol << endl;
+                    }
+                    else if( symbolMine == "R1")
+                    {
+                        addressMine = newSymbolTable.getAddress("LCL");
+                        cout << "Symbol added to file:  " << addressMine << endl;
+                        string binarySymbol = convertTo16BitBinary(addressMine);
+                        hackFile << binarySymbol << endl;
+                    }
+                    else if( symbolMine == "R2")
+                    {
+                        addressMine = newSymbolTable.getAddress("ARG");
+                        cout << "Symbol added to file:  " << addressMine << endl;
+                        string binarySymbol = convertTo16BitBinary(addressMine);
+                        hackFile << binarySymbol << endl;
+                    }
+                    else if( symbolMine == "R3")
+                    {
+                        addressMine = newSymbolTable.getAddress("THIS");
+                        cout << "Symbol added to file:  " << addressMine << endl;
+                        string binarySymbol = convertTo16BitBinary(addressMine);
+                        hackFile << binarySymbol << endl;
+                    }
+                    else if( symbolMine == "R4")
+                    {
+                        addressMine = newSymbolTable.getAddress("THAT");
+                        cout << "Symbol added to file:  " << addressMine << endl;
+                        string binarySymbol = convertTo16BitBinary(addressMine);
+                        hackFile << binarySymbol << endl;
+                    }
+                    else 
+                    {
+                        addressMine = newSymbolTable.getAddress(symbolMine);
+                        cout << "Symbol added to file:  " << addressMine << endl;
+                        string binarySymbol = convertTo16BitBinary(addressMine);
+                        hackFile << binarySymbol << endl;
+                    }
                 }
             }
             else if( symbolMine == "VOID" && commandTypeMine == "C_COMMAND") //If it's a C_COMMAND, build C_COMMAND code and write to file
@@ -207,16 +245,19 @@ void firstPassForA(Parser& ParserTwo)
         string symbolMine = ParserTwo.symbol();
         if(commandTypeMine == "A_COMMAND" && symbolMine != "VOID" )
         {   
-            //Only Add an A_COMMAND if the A_COMMAND does not exist in Symbol Table   
-            if(!newSymbolTable.contains(symbolMine))
+            if( symbolMine != "R0" && symbolMine != "R1" && symbolMine != "R2" && symbolMine != "R3" && symbolMine != "R4")
             {
-                string& symbolRef = symbolMine;
-                bool isNumber = numberVerifierFunction(symbolMine);
-                if(!isNumber)
+                //Only Add an A_COMMAND if the A_COMMAND does not exist in Symbol Table   
+                if(!newSymbolTable.contains(symbolMine))
                 {
-                    cout << "A Command for Insertion:       " << symbolRef << "    with length     "<< symbolMine.length() << " \n" << endl;
-                    newSymbolTable.addEntry(symbolRef, addressOfNextVariable);
-                    addressOfNextVariable++;
+                    string& symbolRef = symbolMine;
+                    bool isNumber = numberVerifierFunction(symbolMine);
+                    if(!isNumber)
+                    {
+                        cout << "A Command for Insertion:       " << symbolRef << "    with length     "<< symbolMine.length() << " \n" << endl;
+                        newSymbolTable.addEntry(symbolRef, addressOfNextVariable);
+                        addressOfNextVariable++;
+                    }
                 }
             }
         }
