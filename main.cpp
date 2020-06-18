@@ -3,17 +3,19 @@
 #include "code.h"
 #include "symboltable.h"
 #include <bitset>
+#include <fstream>
 using namespace std;
 
 string getFileName(string inputFile); //Prototype
-string convertTo16BitBinary(string inputSymbol); //Prototype
+string convertTo16BitBinary(int inputAddress); //Prototype
 void initializeSymbolTable(string symbolsFile); //Protoype
 bool numberVerifierFunction(string& variableToVerify); //Prototype
-void firstPass(Parser& newParserObject); //Prototype
-void secondPass(); //Prototype
+void firstPassForA(Parser& ParserTwo); //Prototype
+void firstPassForL(Parser& ParserTwo); //Prototype
 
 SymbolTable newSymbolTable;
 Parser parserObject;
+Parser ParserTwo;
 Code codeObject;
 
 int addressOfNextVariable;
@@ -28,22 +30,77 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    parserObject.initializer( argv[1]);
-    ofstream hackFile( getFileName(argv[1]) + ".hack");
-    initializeSymbolTable("predefinedsymbols.txt");
-    firstPass(parserObject);
-     
+    parserObject.initializer( argv[1]); //Open asm file for first pass
+    initializeSymbolTable("predefinedsymbols.txt"); //Initialize Symbol Table
+    firstPassForL(parserObject); //First pass to build symbol table with only L Commands
+    
+    //Close input asm file
     if( !parserObject.asmFile.eof())
     {
         cerr << "Error in reading file " << argv[1] << endl;
         return 2;
     }
+    parserObject.asmFile.close();
+
+    parserObject.initializer( argv[1]); //Open asm file for first pass
+    firstPassForA(parserObject); //First pass to build symbol table with A Commands
+
+    //Close input asm file
+    if( !parserObject.asmFile.eof())
+    {
+        cerr << "Error in reading file " << argv[1] << endl;
+        return 2;
+    }
+    parserObject.asmFile.close();
+
+    ParserTwo.initializer( argv[1]); //Open asm file for second pass
+    ofstream hackFile( getFileName(argv[1]) + ".hack"); //Open hack file to write binary code
+
+    //Second Pass
+    while(ParserTwo.hasMoreCommands())
+    {
+        string symbolMine, destMine, compMine, jumpMine;
+        int addressMine;
+        ParserTwo.advance();
+        string commandTypeMine = ParserTwo.commandType();
+        if (commandTypeMine != "IGNORE")
+        {
+            symbolMine = ParserTwo.symbol();
+            //If symbol is of A_COMMAND type, proceed ...
+            if( symbolMine != "VOID" && commandTypeMine == "A_COMMAND")
+            {
+                if( numberVerifierFunction(symbolMine)) //If it's a number, don't check symbol table. Just convert to binary and write to file
+                {
+                    cout << "Number added to file:  " << symbolMine << endl;
+                    string binarySymbol = convertTo16BitBinary(stoi(symbolMine));
+                    hackFile << binarySymbol << endl;
+                }
+                else if( !numberVerifierFunction(symbolMine)) //If it's not a number, get address from symbol table, convert to binary and write to file
+                {
+                    addressMine = newSymbolTable.getAddress(symbolMine);
+                    cout << "Symbol added to file:  " << addressMine << endl;
+                    string binarySymbol = convertTo16BitBinary(addressMine);
+                    hackFile << binarySymbol << endl;
+                }
+            }
+            else if( symbolMine == "VOID" && commandTypeMine == "C_COMMAND") //If it's a C_COMMAND, build C_COMMAND code and write to file
+            {
+                cout << "C_Command to be processed: " << symbolMine << endl;
+                destMine =  codeObject.dest(ParserTwo.dest());
+                compMine =  codeObject.comp(ParserTwo.comp());
+                jumpMine = codeObject.jump(ParserTwo.jump());
+
+                cout << "Processed C_Command:   " << destMine + compMine + jumpMine << endl;
+
+                hackFile << "111" + compMine + destMine + jumpMine << endl;
+            }
+        }
+    }
 
     cout << "Conversion of assembly language to machine code completed." << endl;
-    cout << parserObject.getLineCount() << " lines of actual code processed." << endl;
+    cout << ParserTwo.getLineCount() << " lines of actual code processed." << endl;
     hackFile.close();
     newSymbolTable.display();
-    newSymbolTable.getAddress("MAX");
     return 0;
 }
 
@@ -64,12 +121,12 @@ string getFileName(string inputFile)
     return newFileName;
 }
 
-//routine for converting symbol to binary
-string convertTo16BitBinary(string inputSymbol)
+//routine for converting numbers to binary
+string convertTo16BitBinary(int inputAddress)
 {
-    long decimalNumber = stoi(inputSymbol);
+    long decimalNumber = stoi(to_string(inputAddress));
     bitset<16> b(decimalNumber);
-    cout << "String " << inputSymbol << " is " << decimalNumber 
+    cout << "String " << inputAddress << " is " << decimalNumber 
          << " in decimal and " << b << " as a 16-bit binary." << endl;
 
     return b.to_string();
@@ -108,19 +165,46 @@ void initializeSymbolTable(string symbolsFile)
     }
 
     addressOfNextVariable = newSymbolTable.getAddress("R15") + 1;
-    // newSymbolTable.display();
     inputFile.close();
 }
 
 
-//Routine to populate symbol table with symbols
-void firstPass(Parser& newParserObject)
+void firstPassForL(Parser& ParserTwo)
 {
-    while (newParserObject.hasMoreCommands())
+    while (ParserTwo.hasMoreCommands())
     {
-        newParserObject.advance();
-        string commandTypeMine = newParserObject.commandType();
-        string symbolMine = newParserObject.symbol();
+        ParserTwo.advance();
+        string commandTypeMine = ParserTwo.commandType();
+        string symbolMine = ParserTwo.symbol();
+        if(commandTypeMine == "L_COMMAND" && symbolMine != "VOID")
+        {
+            string& symbolRef = symbolMine;
+            int lineAddress = ParserTwo.getLineCount();
+            /*
+            If the L_Command hasn't been preadded as an A_COMMAND, then add L_COMMAND to symbol table
+            else change the address of the existing L_COMMAND previously added as an A_COMMAND to the right line count
+            */
+            if(!newSymbolTable.contains(symbolMine))
+            {
+                cout << "L COMMAND for insertion:   " << symbolRef << " with address     " << lineAddress << endl;
+                newSymbolTable.addEntry(symbolRef, lineAddress);
+            }
+            else if(newSymbolTable.contains(symbolMine))
+            {
+                cout << symbolMine << " already exists in Symbol table!" << endl;
+            }
+        }
+    }
+}
+
+//Routine to populate symbol table with symbols
+void firstPassForA(Parser& ParserTwo)
+{
+    while (ParserTwo.hasMoreCommands())
+    {
+        ParserTwo.advance();
+        string commandTypeMine = ParserTwo.commandType();
+        string symbolMine = ParserTwo.symbol();
         if(commandTypeMine == "A_COMMAND" && symbolMine != "VOID" )
         {   
             //Only Add an A_COMMAND if the A_COMMAND does not exist in Symbol Table   
@@ -136,27 +220,7 @@ void firstPass(Parser& newParserObject)
                 }
             }
         }
-        else if(commandTypeMine == "L_COMMAND" && symbolMine != "VOID")
-        {
-            string& symbolRef = symbolMine;
-            int lineAddress = newParserObject.getLineCount() + 1;
-            /*
-            If the L_Command hasn't been preadded as an A_COMMAND, then add L_COMMAND to symbol table
-            else change the address of the existing L_COMMAND previously added as an A_COMMAND to the right line count
-            */
-            if(!newSymbolTable.contains(symbolMine))
-            {
-                cout << "L COMMAND for insertion:   " << symbolRef << " with address     " << lineAddress << endl;
-                newSymbolTable.addEntry(symbolRef, lineAddress);
-            }
-            else if(newSymbolTable.contains(symbolMine))
-            {
-                cout << symbolMine << " already exists in Symbol table!" << endl;
-                newSymbolTable.setAddress(symbolMine, lineAddress);
-            }
-        }
-    }
-    
+    }   
 }
 
 
@@ -175,35 +239,4 @@ bool numberVerifierFunction(string& variableToVerify)
 
     cout << "Test for only numbers returned:        " << true << endl;
     return true;
-}
-
-
-//Second pass
-void secondPass()
-{
-    while(parserObject.hasMoreCommands())
-    {
-        parserObject.advance();
-        if(parserObject.commandType() != "IGNORE")
-        {
-            symbol = parserObject.symbol();
-            if( symbol != "VOID")
-            {
-                cout << "Symbol added to file:  " << symbol << endl;
-                string binarySymbol = convertTo16BitBinary(symbol);
-                // hackFile << binarySymbol << endl;
-            }
-            else if( symbol == "VOID")
-            {
-                cout << "C_Command to be processed: " << symbol << endl;
-                dest =  codeObject.dest(parserObject.dest());
-                comp =  codeObject.comp(parserObject.comp());
-                jump = codeObject.jump(parserObject.jump());
-
-                cout << "Processed C_command:   " << dest + comp + jump << endl;
-
-                // hackFile << "111" + comp + dest + jump << endl;
-            }
-        }
-    }
 }

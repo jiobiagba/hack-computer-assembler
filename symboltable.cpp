@@ -5,13 +5,6 @@ using namespace std;
 
 int hashFunction(string& input); //Prorotype
 
-//Defining methods of the Entry class
-//Basic entry 
-// Entry::Entry()
-// {
-//     nextEntry = NULL;
-// };
-
 //Entry with supplied key and address
 Entry::Entry(string key, int address)
 {
@@ -133,16 +126,6 @@ bool SymbolTable::setAddress(string key, int newAddress)
     cout << "This key does not exist in Symbol Table!" << endl;
     return false;
 }
-
-//Free key Table Memory
-SymbolTable::~SymbolTable()
-{
-    for (int i = 0; i < MAX; i++)
-    {
-            delete entryHead[i];
-    }
-}
-
 
 //Hash Function
 int hashFunction(string& input)

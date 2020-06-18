@@ -48,7 +48,6 @@ bool Parser::hasMoreCommands()
         } else
         {
             lineHolder = holderA;
-            lineCounter = lineCounter + 1;
         }
 
         return true;
@@ -62,6 +61,8 @@ void Parser::advance()
     cout << "Length before whitespace removal:  " << lineHolder.length() << endl;
     nextCommand = removeAllWhiteSpaces(lineHolder);
     cout << "Length after whitespace removal:   " << nextCommand.length() << endl;
+    if(nextCommand[0] == '@') lineCounter++;
+    else if(nextCommand.find('=') != -1 || nextCommand.find(';') != -1) lineCounter++;
 }
 
 
