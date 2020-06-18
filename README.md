@@ -1,18 +1,8 @@
 # Assembler-CSandE
-Hi. At this point, stage 1 of the assembler is complete (the assembler that can only take "symboless" assembbly code). Handling of comments and white/empty spaces have not been implemented. Those will be added in stage 2.
+Hi. I have built a working Assembler with C++. It transforms Assembly Code matching specifications set in the book "Elements of Computing Systems: Building a Modern Computer from First Principles by Noam Nisan and Shimon Schocken" to machine code for processing by the Hack Computer.
 
+Compile with "g++ -o Assembler symboltable.cpp main.cpp code.cpp parser.cpp" in your Linux terminal after cloning the project. To convert an asm file (say add.asm) to hack, run "./Assembler add.asm" in your Linux terminal.
 
-To compile, run "g++ -o Assembler main.cpp code.cpp parser.cpp" in your Linux terminal after cloning this project.
+This project made me delve into the world of C++ - learning C++ within a month so as to have a feel of another language besides JavaScript/TypeScript. And I must say I'm now a C++ fan. Hoping to be a more competent developer even with C++.
 
-
-To convert an asm file (say add.asm) to hack, run "./Assembler add.asm" in your Linux terminal.
-
-
-
-Stage 2 loading ...
-
-First pass of Stage 2 completed. At this stage, compile with "g++ -o Assembler symboltable.cpp main.cpp code.cpp parser.cpp" in your Linux terminal after cloning the project. To convert an asm file (say add.asm) to hack, run "./Assembler add.asm" in your Linux terminal.
-
-With this stage completed, all variables and labels will be added to Symbol Table once program is run. Empty lines and comments will be ignored. Also, for all other lines that are considered valid lines, all leading, trailing and in-between whitespaces will be removed before processing.
-
-Second pass loading ...
+To Prof. Nisan and Prof. Shocken, thank you for such a great book. It continues to increase my understanding and appreciation of this wonderful machine we take for granted called the Cmomputer. Onto virtual machines!!!
