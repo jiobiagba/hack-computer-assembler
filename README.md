@@ -66,4 +66,4 @@ Please note that pull requests are also welcome but PRs made directly to the mas
 * your compiler
 
 # Credits
- Prof. Noam Nisan and Prof. Shimon Schocken of [NAND AND TETRIS](https://www.nand2tetris.org/)
+ Prof. Noam Nisan and Prof. Shimon Schocken of [FROM NAND TO TETRIS](https://www.nand2tetris.org/)
